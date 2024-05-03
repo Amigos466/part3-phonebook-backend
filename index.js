@@ -24,6 +24,17 @@ const persons = [
     }
 ]
 
+app.get('/api/persons/:id', (request, response) => {
+    const personId = Number(request.params.id);
+    const person = persons.find(p => p.id === personId);
+
+    if(!person) {
+        response.status(404).end();
+    } else {
+        response.json(person);
+    }
+})
+
 app.get('/api/persons', (request, response) => {
     response.json(persons)
 })
