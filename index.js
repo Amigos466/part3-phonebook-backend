@@ -26,6 +26,25 @@ let persons = [
     }
 ]
 
+const validateNewPersonMiddleware = (request, response, next) => {
+    const newPerson = request.body;
+    // As in requirements, better to keep { [filed]: errorString } structure to validate all errors at once
+    if (!newPerson.number) {
+        return response.status(403).json({ error: 'number is required' });
+    }
+    if (!newPerson.name) {
+        return response.status(403).json({ error: 'name is required' });
+    }
+    if (persons.some(p => p.number ===  newPerson.number)) {
+        return response.status(403).json({ error: 'number must be unique' });
+    }
+    if (persons.some(p => p.name ===  newPerson.name)) {
+        return response.status(403).json({ error: 'name must be unique' });
+    }
+
+    return next();
+}
+
 app.get('/api/persons/:id', (request, response) => {
     const personId = Number(request.params.id);
     const person = persons.find(p => p.id === personId);
@@ -43,8 +62,8 @@ app.delete('/api/persons/:id', (request, response) => {
     response.status(204).end();
 })
 
-app.post('/api/persons', (request, response) => {
-    const newPerson = request.body
+app.post('/api/persons', validateNewPersonMiddleware, (request, response) => {
+    const newPerson = request.body;
     newPerson.id = Math.floor(Math.random() * 99999); // as in requirements
     persons = persons.concat(newPerson)
     response.json(newPerson);
